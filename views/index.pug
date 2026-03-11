@@ -1,0 +1,28 @@
+extends layout
+
+block content
+  h1 Mapa de Bicicletas
+
+  #map(style="height: 500px")
+
+  script(src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")
+  link(rel="stylesheet", href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")
+
+  script.
+    const map = L.map('map').setView([14.0723, -87.1921], 13);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    fetch('/api/bicicletas')
+      .then(response => response.json())
+      .then(data => {
+        data.bicicletas.forEach(bici => {
+          const marker = L.marker(bici.ubicacion).addTo(map);
+          marker.bindPopup(
+            "Modelo: " + bici.modelo +
+            "<br>Color: " + bici.color
+          );
+        });
+      });
