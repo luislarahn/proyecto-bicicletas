@@ -3,10 +3,20 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const mongoose = require('mongoose');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const apiRouter = require('./routes/api');
+
+mongoose.connect('mongodb://127.0.0.1:27017/red_bicicletas');
+
+const db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'Error de conexión con MongoDB:'));
+db.once('open', function () {
+  console.log('Conectado a MongoDB: red_bicicletas');
+});
 
 const app = express();
 
