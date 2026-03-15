@@ -1,0 +1,13 @@
+extends ../layout
+
+block content
+  h1= title
+  p= message
+
+  if previewUrl
+    p
+      a(href=previewUrl target='_blank') Ver correo de prueba en Ethereal
+
+  if actionUrl && actionText
+    p
+      a(href=actionUrl)= actionText
