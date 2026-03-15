@@ -1,0 +1,23 @@
+extends ../layout
+
+block content
+  h1= title
+
+  if error
+    p(style='color: red;')= error
+
+  form(action='/login' method='POST')
+    div(style='margin-bottom: 10px;')
+      label(for='email') Email
+      br
+      input#email(type='email' name='email' required)
+
+    div(style='margin-bottom: 10px;')
+      label(for='password') Contraseña
+      br
+      input#password(type='password' name='password' required)
+
+    button(type='submit') Iniciar sesión
+
+  p(style='margin-top: 15px;')
+    a(href='/users/register') Ir al registro
