@@ -30,4 +30,10 @@ router.post('/login', (req, res, next) => {
 
 router.get('/logout', loginController.logout);
 
+router.get('/forgot-password', loginController.forgotPasswordForm);
+router.post('/forgot-password', loginController.forgotPassword);
+
+router.get('/reset-password/:token', loginController.resetPasswordForm);
+router.post('/reset-password/:token', loginController.resetPassword);
+
 module.exports = router;

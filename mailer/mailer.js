@@ -26,4 +26,22 @@ async function sendWelcomeEmail(to, verificationLink) {
   return nodemailer.getTestMessageUrl(info);
 }
 
-module.exports = { sendWelcomeEmail };
+async function sendResetPasswordEmail(to, resetLink) {
+  const info = await transporter.sendMail({
+    from: '"Proyecto Bicicletas" <no-reply@bicicletas.com>',
+    to,
+    subject: 'Recuperación de contraseña',
+    text: `Para restablecer tu contraseña, entra aquí: ${resetLink}`,
+    html: `
+      <h2>Recuperación de contraseña</h2>
+      <p>Recibimos una solicitud para restablecer tu contraseña.</p>
+      <p>Haz clic en el siguiente enlace para crear una nueva contraseña:</p>
+      <p><a href="${resetLink}">${resetLink}</a></p>
+      <p>Este enlace expirará pronto.</p>
+    `
+  });
+
+  return nodemailer.getTestMessageUrl(info);
+}
+
+module.exports = { sendWelcomeEmail, sendResetPasswordEmail };
