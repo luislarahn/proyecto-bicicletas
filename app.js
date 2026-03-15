@@ -5,7 +5,9 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const jwt = require('jsonwebtoken');
 
+const Bicicleta = require('./models/bicicleta');
 const passport = require('./config/passport');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -19,6 +21,29 @@ function loggedIn(req, res, next) {
   return res.redirect('/login');
 }
 
+function validarUsuario(req, res, next) {
+  const token = req.headers['x-access-token'];
+
+  if (!token) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Debe autenticarse. Token requerido'
+    });
+  }
+
+  jwt.verify(token, req.app.get('secretKey'), (error, decoded) => {
+    if (error) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Token inválido o expirado'
+      });
+    }
+
+    req.apiUser = decoded;
+    next();
+  });
+}
+
 mongoose.connect('mongodb://127.0.0.1:27017/red_bicicletas');
 
 const db = mongoose.connection;
@@ -29,6 +54,7 @@ db.once('open', function () {
 });
 
 const app = express();
+app.set('secretKey', 'Bicicletas_API_2026_*_JWT_Seguro_!_CHICO');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -60,7 +86,20 @@ app.use('/', loginRouter);
 app.use('/users', usersRouter);
 app.use('/api', apiRouter);
 
-// ruta protegida al final
+// API protegida con JWT
+app.get('/api/bicicletas', validarUsuario, async (req, res, next) => {
+  try {
+    const bicicletas = await Bicicleta.find();
+    return res.json({
+      status: 'success',
+      data: bicicletas
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ruta protegida web al final
 app.use('/', loggedIn, indexRouter);
 
 // catch 404 and forward to error handler
@@ -72,6 +111,13 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  if (req.originalUrl.startsWith('/api/')) {
+    return res.status(err.status || 500).json({
+      status: 'error',
+      message: err.message
+    });
+  }
 
   res.status(err.status || 500);
   res.render('error');
